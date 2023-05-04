@@ -33,7 +33,7 @@ public class PaperMC extends Provider {
             // Define build ID
             build = 0;
 
-            if (version == null) {
+            if (version == null || version.isBlank()) {
                 // Find the latest version
                 ArrayList<String> versions = getAllVersions(name);
                 version = versions.get((versions.size() - 1));

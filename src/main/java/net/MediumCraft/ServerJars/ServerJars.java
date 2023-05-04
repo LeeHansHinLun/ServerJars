@@ -1,12 +1,14 @@
 package net.MediumCraft.ServerJars;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.MediumCraft.ServerJars.Checksum.SHA256;
 import net.MediumCraft.ServerJars.Logging.Logger;
 import net.MediumCraft.ServerJars.Providers.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class ServerJars {
     static ArrayList<Provider> providers = getProviders();
@@ -16,33 +18,91 @@ public class ServerJars {
         // TODO: Loop through all of the providers to find args[0], download & run the jar file.
         // TODO: CHECK THE CHECKSUM BECAUSE IF FILE IS NOT CHANGED IT DOES NOT NEED TO BE DOWNLOADED (one of the issues on the previous version)
 
-        String softwareName = null;
-        try {
-            softwareName = args[0];
-        } catch (IndexOutOfBoundsException exception) {
-            Logger.error("An argument is required for software. Please check your command.");
-            Logger.error("Command Example: java -jar ServerJars.jar softwareName [type] [minecraft version]");
+        Properties configuration = new Properties();
+        boolean firstRun = false;
 
-            // Quit as we have nothing else to do
-            System.exit(0);
+        try {
+            File configurationDirectory = new File("./ServerJars/");
+            File configurationFile = new File("./ServerJars/config.properties");
+
+            if (!configurationFile.exists()) {
+                if (!configurationDirectory.mkdirs()) {
+                    Logger.log("Configuration directory already exists!");
+                }
+
+                configurationFile.createNewFile();
+                firstRun = true;
+
+            }
+
+            configuration.load(new FileInputStream("./ServerJars/config.properties"));
+
+            if (firstRun) {
+                configuration.setProperty("software", "paper");
+                configuration.setProperty("type", "server");
+                configuration.setProperty("version", "");
+                configuration.setProperty("unsafeMode", "false");
+            }
+
+        } catch (IOException e) {
+            Logger.error("RuntimeException while setting up configuration file!");
+            throw new RuntimeException(e);
         }
 
-        @Nullable String type = args[1];
-        @Nullable String version = args[2];
+        String softwareName = configuration.getProperty("software");
+        String type = configuration.getProperty("type");
+        @Nullable String version = configuration.getProperty("version");
+        String unsafeMode = configuration.getProperty("unsafeMode");
 
         for (Provider provider : providers) {
             if (!(provider.getSoftwareId() == softwareName)) {
                 continue;
             } else {
                 Logger.log("Loaded " + softwareName);
-                provider.downloadFile(type, softwareName, version);
-                File serverFile = new File("./server.jar");
-                String sha256 = SHA256.checkSHA256(serverFile);
-                if (sha256 != provider.getHash(type, softwareName, version)) {
+                File serverJar = new File("./server.jar");
+                if (serverJar.exists()) {
+                    String localFileChecksum = SHA256.checkSHA256(serverJar);
+                    String remoteChecksum = provider.getHash(type, softwareName, version, provider.getBuild());
 
+                    if (localFileChecksum != remoteChecksum) {
+                        Logger.log("Outdated local file! Automatically updating!");
+                        serverJar.delete();
+                        File newServerJar = provider.downloadFile(type, softwareName, version);
+
+                        // Redo Checksum
+                        String newLocalFileChecksum = SHA256.checkSHA256(newServerJar);
+                        if (newLocalFileChecksum != remoteChecksum) {
+                            // Corrupted File Processing
+                            if (!(unsafeMode == "true")) {
+                                Logger.error("Incorrect Checksum! File is corrupted or altered!");
+                                Logger.error("ServerJars will not run a file that does not match checksum unless it is in unsafe mode!");
+                                Logger.error("Please re-run to make sure there is no issues");
+                            } else {
+                                // Unsafe mode, fine I'll run
+                                break;
+                            }
+                        }
+                    }
+                } else {
+                    provider.downloadFile(type, softwareName, version);
+
+                    // Checksum
+                    String remoteChecksum = provider.getHash(type, softwareName, version, provider.getBuild());
+                    String localChecksum = SHA256.checkSHA256(serverJar);
+
+                    if (localChecksum != remoteChecksum) {
+                        if (!(unsafeMode == "true")) {
+                            Logger.error("Incorrect Checksum! File is corrupted or altered!");
+                            Logger.error("ServerJars will not run a file that does not match checksum unless it is in unsafe mode!");
+                            Logger.error("Please re-run to make sure there is no issues");
+                        } else {
+                            break;
+                        }
+                    }
                 }
             }
         }
+
     }
 
     public static ArrayList<Provider> getProviders() {

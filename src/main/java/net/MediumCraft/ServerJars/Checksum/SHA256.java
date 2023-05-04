@@ -40,7 +40,7 @@ public class SHA256 {
             exception.printStackTrace();
         }
 
-
+        return null;
     }
 
 }
