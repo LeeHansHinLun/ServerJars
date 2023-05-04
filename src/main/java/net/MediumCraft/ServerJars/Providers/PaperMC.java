@@ -111,11 +111,12 @@ public class PaperMC extends Provider {
         return null;
     }
 
-    public String getAttributes(String attributeName) {
-        String attribute = null;
-        if (attributeName == "latestBuild") {
-           return null;
-        }
+    public int getLatestBuild() {
+
+        return 0;
+    }
+
+    public String getLatestVersion() {
         return null;
     }
 

@@ -62,9 +62,13 @@ public abstract class Provider {
     public abstract String getHash(@Nullable String type, String name, @Nullable String version, int build);
 
     /**
-     * A way to contact the API client and get extra information
-     * @param attributeName
-     * @return Attribute in string
+     * Get latest build ID
+     * @return Build ID in integer
      */
-    public abstract String getAttributes(String attributeName);
+    public abstract int getLatestBuild();
+    /**
+     * Get latest version
+     * @return Version in String
+     */
+    public abstract String getLatestVersion();
 }
