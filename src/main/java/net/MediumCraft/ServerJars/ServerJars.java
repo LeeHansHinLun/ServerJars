@@ -1,6 +1,6 @@
 package net.MediumCraft.ServerJars;
 
-import net.MediumCraft.ServerJars.Providers.Provider;
+import net.MediumCraft.ServerJars.Providers.*;
 
 import java.util.ArrayList;
 

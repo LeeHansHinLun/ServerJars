@@ -3,6 +3,7 @@ package net.MediumCraft.ServerJars.Providers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.MediumCraft.ServerJars.Logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -11,11 +12,6 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class PaperMC extends Provider {
-
-    public static void main(String[] args) {
-        PaperMC instance = new PaperMC();
-        instance.getDownloadLink("server", "velocity", null);
-    }
     public String getApiId() {
         return "paper";
     }
@@ -85,8 +81,18 @@ public class PaperMC extends Provider {
     }
 
     public File downloadFile(String type, String name, @Nullable String version) {
-        // TODO: Download the server file into server.jar
-        return null;
+        try {
+            File file = new File("./server.jar");
+            //String fileUrl = getDownloadLink(type, name, version);
+            URL fileUrl = new URL(getDownloadLink(type, name, version));
+            FileUtils.copyURLToFile(fileUrl, file);
+            return file;
+        } catch (IOException error) {
+            Logger.error("IOException: Please report this bug to the developers.");
+            error.printStackTrace();
+            return null;
+        }
+
     }
 
     public ArrayList<String> getAllVersions(String softwareName) throws IOException {

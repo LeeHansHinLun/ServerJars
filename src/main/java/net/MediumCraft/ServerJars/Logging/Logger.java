@@ -16,4 +16,12 @@ public class Logger {
         }
     }
 
+    public static void error(String logContent) {
+        if (prefix.length() == 0) {
+            System.err.println(logContent);
+        } else {
+            System.err.printf("[%s] %s%n", prefix, logContent);
+        }
+    }
+
 }
