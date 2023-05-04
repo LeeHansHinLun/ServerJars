@@ -12,6 +12,10 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class PaperMC extends Provider {
+
+    int build;
+    String version;
+
     public String getApiId() {
         return "paper";
     }
@@ -27,12 +31,13 @@ public class PaperMC extends Provider {
     public String getDownloadLink(String type, String name, @Nullable String version) {
         try {
             // Define build ID
-            int build = 0;
+            build = 0;
 
             if (version == null) {
                 // Find the latest version
                 ArrayList<String> versions = getAllVersions(name);
                 version = versions.get((versions.size() - 1));
+                this.version = version;
 
 
                 // Find the latest build
@@ -42,6 +47,7 @@ public class PaperMC extends Provider {
                 // Find the latest build
                 ArrayList<String> builds = getAllBuilds(version, name);
                 build = Integer.parseInt(builds.get((builds.size() - 1)));
+                this.version = version;
             }
 
             String fileName = getFileName(version, build, name);
@@ -111,13 +117,13 @@ public class PaperMC extends Provider {
         return null;
     }
 
-    public int getLatestBuild() {
+    public int getBuild() {
 
-        return 0;
+        return build;
     }
 
-    public String getLatestVersion() {
-        return null;
+    public String getVersion() {
+        return version;
     }
 
     public ArrayList<String> getAllVersions(String softwareName) throws IOException {

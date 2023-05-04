@@ -65,10 +65,10 @@ public abstract class Provider {
      * Get latest build ID
      * @return Build ID in integer
      */
-    public abstract int getLatestBuild();
+    public abstract int getBuild();
     /**
      * Get latest version
      * @return Version in String
      */
-    public abstract String getLatestVersion();
+    public abstract String getVersion();
 }
