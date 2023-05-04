@@ -45,7 +45,7 @@ public class PaperMC extends Provider {
             }
 
             String fileName = getFileName(version, build, name);
-            String sha256 = getSha256(version, build, name);
+            String sha256 = getHash(type, name, version, build);
 
             String downloadUrl = getApiAddress() + String.format("v2/projects/%s/versions/%s/builds/%s/downloads/%s", name, version, build, fileName);
             System.out.println("[ServerJars] Created Download Link!");
@@ -95,6 +95,30 @@ public class PaperMC extends Provider {
 
     }
 
+    public String getHash(@Nullable String type, String name, @Nullable String version, int build) {
+        try {
+            URL url = new URL(getApiAddress() + String.format("v2/projects/%s/versions/%s/builds/%d", name, version, build));
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(url);
+            JsonNode downloadsNode = rootNode.path("downloads");
+            JsonNode applicationNode = downloadsNode.path("application");
+            return applicationNode.path("sha256").asText();
+        } catch (IOException exception) {
+            Logger.error("IOException while getting hash information!");
+            exception.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public String getAttributes(String attributeName) {
+        String attribute = null;
+        if (attributeName == "latestBuild") {
+           return null;
+        }
+        return null;
+    }
+
     public ArrayList<String> getAllVersions(String softwareName) throws IOException {
         ArrayList<String> versions = new ArrayList<String>();
         URL url = new URL(getApiAddress() + String.format("v2/projects/%s", softwareName));
@@ -116,14 +140,4 @@ public class PaperMC extends Provider {
         JsonNode applicationNode = downloadsNode.path("application");
         return applicationNode.path("name").asText();
     }
-
-    public String getSha256(String version, int build, String softwareName) throws IOException {
-        URL url = new URL(getApiAddress() + String.format("v2/projects/%s/versions/%s/builds/%d", softwareName, version, build));
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode rootNode = mapper.readTree(url);
-        JsonNode downloadsNode = rootNode.path("downloads");
-        JsonNode applicationNode = downloadsNode.path("application");
-        return applicationNode.path("sha256").asText();
-    }
-
 }

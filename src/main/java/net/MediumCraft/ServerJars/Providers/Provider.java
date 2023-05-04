@@ -42,12 +42,29 @@ public abstract class Provider {
     public abstract String getDownloadLink(@Nullable String type, String name, @Nullable String version);
 
     /**
+     * Download the server JAR file
      *
      * @param type Type of software, example: server, proxy, nullable as it is not always required
      * @param name Important, the name of the software, usually used in API urls
      * @param version Minecraft version, not required but recommended
      * @return A file object to the downloaded file
      */
-    public abstract File downloadFile(String type, String name, @Nullable String version);
+    public abstract File downloadFile(@Nullable String type, String name, @Nullable String version);
 
+    /**
+     * Beta Feature, Recommended to not use
+     * Gets hash of the file
+     * @param type Type of software, example: server, proxy, nullable as it is not always required
+     * @param name Important, the name of the software, usually used in API urls
+     * @param version Minecraft version, not required but recommended
+     * @return
+     */
+    public abstract String getHash(@Nullable String type, String name, @Nullable String version, int build);
+
+    /**
+     * A way to contact the API client and get extra information
+     * @param attributeName
+     * @return Attribute in string
+     */
+    public abstract String getAttributes(String attributeName);
 }
